@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace GmusCalculator
 {
@@ -10,17 +11,17 @@ namespace GmusCalculator
         {
             List<Course> courses = new List<Course>
             {
-                new Course("c++",212,CourseType.Qualification),
-                new Course("c#",72,CourseType.Qualification),
-                new Course("A.A",14,CourseType.Qualification),
+                new Course("C++",212,CourseType.Qualification),
+                new Course("C#",78,CourseType.Qualification),
+                new Course("Evolutionary algorithm",14,CourseType.Qualification),
                 new Course("Middle East",100,CourseType.Qualification),
-                new Course("arrange and mannage",60,CourseType.Enrichment),
-                new Course("Negotiation",40,CourseType.Enrichment),
-                new Course("Jenoside",100,CourseType.Enrichment),
-                new Course("Born with TV",100,CourseType.Enrichment),
-                new Course("Projects",40,CourseType.Enrichment),
+                new Course("Project management",28,CourseType.Qualification),
+                new Course("arrange and management",60,CourseType.Qualification),
+                new Course("Negotiation",40,CourseType.Qualification),
+                new Course("Genocide",100,CourseType.Enrichment),
+                new Course("Grow with TV",100,CourseType.Enrichment),
             };
-            var results = GetGmushOptions(courses, new Gmush("A", 200, 200), new Gmush("B", 200, 200));
+            var results = GetGmushOptions(courses, new Gmush("A", 200, 190), new Gmush("B", 200, 190));
 
             var ordersResults = results.OrderBy(x => x.Item3.Value);
 
@@ -31,21 +32,28 @@ namespace GmusCalculator
             {
                 Console.WriteLine($"----------------------------------------------------{i++}---------------------------------");
 
-                Console.Write("A: ");
-                foreach (var c in item.Item1)
-                {
-                    Console.Write($"{c.Name} | ");
-                }
+                Console.WriteLine(CourseListToString("A",item.Item1));
+                Console.WriteLine(CourseListToString("B",item.Item2));
 
-                Console.Write($"{Environment.NewLine}B: ");
-                foreach (var c in item.Item2)
-                {
-                    Console.Write($"{c.Name} | ");
-                }
-
-                Console.Write($"{Environment.NewLine}course:");
+                Console.WriteLine("Missing course:");
                 Console.WriteLine(item.Item3);
             }
+        }
+
+        static string CourseListToString(string name, List<Course> courses)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"{name}: ");
+            foreach (var c in courses)
+            {
+                sb.Append($"{c.Name} | ");
+            }
+
+            sb.Append($"{Environment.NewLine}Sum Qualification: {courses.Sum(x => x.GetValue(CourseType.Qualification))} | " +
+                  $"Sum Enrichment: {courses.Sum(x => x.GetValue(CourseType.Enrichment))}");
+
+            return sb.ToString();
         }
 
         static List<(List<Course>, List<Course>, Course)> GetGmushOptions(List<Course> courses, Gmush gmushA, Gmush gmushB)
@@ -114,6 +122,8 @@ namespace GmusCalculator
         {
             return Name.GetHashCode();
         }
+
+        public int GetValue(CourseType type) => Type == type ? Value : 0;
     }
 
     internal enum CourseType
@@ -147,10 +157,12 @@ namespace GmusCalculator
             if (missingQualification <= 0 && totalMissing <= 0)
                 return new Course("Non-Missing", 0, CourseType.Enrichment);
 
+            var totalMissingWithoutQualification = totalMissing - missingQualification;
+
             if (totalMissing > 0)
             {
-                return missingQualification > 0 ? 
-                    new Course("Missing", totalMissing, CourseType.Qualification) : 
+                return missingQualification > 0 ?
+                    new Course("Missing", missingQualification + (totalMissingWithoutQualification > 0 ? totalMissingWithoutQualification : 0), CourseType.Qualification) :
                     new Course("Missing", totalMissing, CourseType.Enrichment);
             }
 
